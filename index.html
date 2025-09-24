@@ -1,0 +1,1227 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Reciclaje de Tarjetas Electrónicas</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        header h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: var(--dark);
+        }
+        
+        nav button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        nav button:hover {
+            background-color: var(--secondary);
+        }
+        
+        nav button.active {
+            background-color: var(--secondary);
+            font-weight: bold;
+        }
+        
+        .section {
+            display: none;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        h2 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light);
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: var(--secondary);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button.danger {
+            background-color: var(--danger);
+        }
+        
+        button.danger:hover {
+            background-color: #c0392b;
+        }
+        
+        button.success {
+            background-color: var(--success);
+        }
+        
+        button.success:hover {
+            background-color: #219653;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--light);
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .alert {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .card h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-card h4 {
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .stat-card p {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--secondary);
+        }
+        
+        .material-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .material-item:last-child {
+            border-bottom: none;
+        }
+        
+        .material-info {
+            flex: 1;
+        }
+        
+        .material-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+        
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            font-weight: bold;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            nav {
+                flex-wrap: wrap;
+            }
+            
+            nav button {
+                flex: 1 0 50%;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Sistema de Gestión de Reciclaje</h1>
+            <nav>
+                <button class="nav-btn active" data-section="clientes">Clientes</button>
+                <button class="nav-btn" data-section="materiales">Ingreso de Materiales</button>
+                <button class="nav-btn" data-section="inventario">Inventario</button>
+                <button class="nav-btn" data-section="finanzas">Finanzas</button>
+                <button class="nav-btn" data-section="corte">Corte de Caja</button>
+            </nav>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Sección de Clientes -->
+        <section id="clientes" class="section active">
+            <h2>Registro de Clientes</h2>
+            <div class="card">
+                <form id="cliente-form">
+                    <div class="form-group">
+                        <label for="cliente-nombre">Nombre:</label>
+                        <input type="text" id="cliente-nombre" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-telefono">Teléfono:</label>
+                        <input type="tel" id="cliente-telefono">
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-email">Email:</label>
+                        <input type="email" id="cliente-email">
+                    </div>
+                    <div class="form-group">
+                        <label for="cliente-direccion">Dirección:</label>
+                        <textarea id="cliente-direccion"></textarea>
+                    </div>
+                    <button type="submit" class="success">Registrar Cliente</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h3>Clientes Registrados</h3>
+                <table id="tabla-clientes">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Teléfono</th>
+                            <th>Email</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los clientes se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Sección de Ingreso de Materiales -->
+        <section id="materiales" class="section">
+            <h2>Ingreso de Materiales</h2>
+            <div class="card">
+                <form id="material-form">
+                    <div class="form-group">
+                        <label for="material-cliente">Cliente:</label>
+                        <select id="material-cliente" required>
+                            <option value="">Seleccione un cliente</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="material-tipo">Tipo de Material:</label>
+                        <select id="material-tipo" required>
+                            <option value="">Seleccione un material</option>
+                            <!-- Las opciones se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="material-cantidad">Cantidad:</label>
+                        <input type="number" id="material-cantidad" min="0" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="material-unidad">Unidad:</label>
+                        <select id="material-unidad" required>
+                            <option value="kilo">Kilo</option>
+                            <option value="pieza">Pieza</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="material-precio">Precio por Unidad:</label>
+                        <input type="number" id="material-precio" min="0" step="0.01" required>
+                    </div>
+                    <button type="submit" class="success">Registrar Material</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h3>Materiales Ingresados Hoy</h3>
+                <table id="tabla-materiales">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Cliente</th>
+                            <th>Material</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Los materiales se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Sección de Inventario -->
+        <section id="inventario" class="section">
+            <h2>Inventario de Materiales</h2>
+            <div class="tabs">
+                <div class="tab active" data-tab="materiales">Materiales</div>
+                <div class="tab" data-tab="precios">Precios</div>
+            </div>
+            
+            <div class="tab-content active" id="materiales-tab">
+                <div class="card">
+                    <h3>Stock Actual</h3>
+                    <div id="lista-inventario">
+                        <!-- Los materiales del inventario se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="precios-tab">
+                <div class="card">
+                    <h3>Configuración de Precios</h3>
+                    <div id="lista-precios">
+                        <!-- Los precios se cargarán aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Finanzas -->
+        <section id="finanzas" class="section">
+            <h2>Finanzas</h2>
+            <div class="stats">
+                <div class="stat-card">
+                    <h4>Inversión Inicial</h4>
+                    <p id="inversion-inicial">$0.00</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Ingresos Totales</h4>
+                    <p id="ingresos-totales">$0.00</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Gastos Totales</h4>
+                    <p id="gastos-totales">$0.00</p>
+                </div>
+                <div class="stat-card">
+                    <h4>Balance Actual</h4>
+                    <p id="balance-actual">$0.00</p>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Registro de Transacciones</h3>
+                <div class="form-group">
+                    <button id="btn-nueva-transaccion" class="success">Nueva Transacción</button>
+                </div>
+                <table id="tabla-transacciones">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Monto</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Las transacciones se cargarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Sección de Corte de Caja -->
+        <section id="corte" class="section">
+            <h2>Corte de Caja</h2>
+            <div class="card">
+                <h3>Generar Reporte</h3>
+                <div class="form-group">
+                    <label for="fecha-inicio">Fecha de Inicio:</label>
+                    <input type="date" id="fecha-inicio">
+                </div>
+                <div class="form-group">
+                    <label for="fecha-fin">Fecha de Fin:</label>
+                    <input type="date" id="fecha-fin">
+                </div>
+                <button id="btn-generar-reporte" class="success">Generar Reporte</button>
+                <button id="btn-descargar-excel" class="success">Descargar a Excel</button>
+            </div>
+            
+            <div class="card">
+                <h3>Resumen del Corte</h3>
+                <div id="resumen-corte">
+                    <!-- El resumen se cargará aquí dinámicamente -->
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal para editar precios -->
+    <div id="modal-precio" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Precio</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="form-precio">
+                <input type="hidden" id="precio-id">
+                <div class="form-group">
+                    <label for="precio-material">Material:</label>
+                    <input type="text" id="precio-material" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="precio-kilo">Precio por Kilo:</label>
+                    <input type="number" id="precio-kilo" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="precio-pieza">Precio por Pieza:</label>
+                    <input type="number" id="precio-pieza" min="0" step="0.01" required>
+                </div>
+                <button type="submit" class="success">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para transacciones -->
+    <div id="modal-transaccion" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Nueva Transacción</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="form-transaccion">
+                <div class="form-group">
+                    <label for="transaccion-tipo">Tipo:</label>
+                    <select id="transaccion-tipo" required>
+                        <option value="ingreso">Ingreso</option>
+                        <option value="gasto">Gasto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="transaccion-descripcion">Descripción:</label>
+                    <input type="text" id="transaccion-descripcion" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaccion-monto">Monto:</label>
+                    <input type="number" id="transaccion-monto" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="transaccion-fecha">Fecha:</label>
+                    <input type="date" id="transaccion-fecha" required>
+                </div>
+                <button type="submit" class="success">Registrar Transacción</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Datos iniciales
+        let datos = {
+            clientes: [],
+            materiales: [],
+            inventario: {},
+            precios: {},
+            transacciones: [],
+            inversionInicial: 0
+        };
+
+        // Lista de materiales
+        const tiposMaterial = [
+            "tarjeta de primera", "tarjeta de segunda", "tarjeta de tercera", 
+            "tarjeta interedia", "ram dorada", "tarjeta de disco duro", 
+            "tarjeta dorada", "tarjeta de tablet", "tarjeta semidorada", 
+            "ram plateada", "tarjeta de laptop", "tarjeta de unidad de cd", 
+            "peine", "celular touch", "celular tecla", "tarjeta de videojuego", 
+            "tarjeta de pc chica", "tarjeta de pc grande", "peine sucio", 
+            "tarjeta automotris", "tarjeta audio", "tarjeta de modem", 
+            "tarjeta cafe", "logica de celular 1A", "logica de celular 2A", 
+            "logica de celular 3A", "procesador dorado", "procesador ceramica", 
+            "procesador plastico negro", "procesador plastico pines", 
+            "procesador plastico pines sucio", "procesador liso", 
+            "procesador liso sucio", "pila de celular", "pila de laptop", 
+            "pila de li-hion", "membrana", "radiografia", "cable", 
+            "cale utp", "fuente de pc"
+        ];
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarDatos();
+            inicializarNavegacion();
+            inicializarFormularios();
+            inicializarTabs();
+            inicializarModales();
+            actualizarInterfaz();
+        });
+
+        // Cargar datos desde localStorage
+        function cargarDatos() {
+            const datosGuardados = localStorage.getItem('datosReciclaje');
+            if (datosGuardados) {
+                datos = JSON.parse(datosGuardados);
+            } else {
+                // Inicializar precios por defecto
+                tiposMaterial.forEach(material => {
+                    datos.precios[material] = {
+                        kilo: 0,
+                        pieza: 0
+                    };
+                });
+                
+                // Inicializar inventario
+                tiposMaterial.forEach(material => {
+                    datos.inventario[material] = {
+                        kilos: 0,
+                        piezas: 0
+                    };
+                });
+                
+                guardarDatos();
+            }
+        }
+
+        // Guardar datos en localStorage
+        function guardarDatos() {
+            localStorage.setItem('datosReciclaje', JSON.stringify(datos));
+        }
+
+        // Navegación entre secciones
+        function inicializarNavegacion() {
+            const botonesNav = document.querySelectorAll('.nav-btn');
+            botonesNav.forEach(boton => {
+                boton.addEventListener('click', function() {
+                    const seccionId = this.getAttribute('data-section');
+                    
+                    // Remover clase active de todos los botones y secciones
+                    botonesNav.forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                    
+                    // Agregar clase active al botón y sección seleccionados
+                    this.classList.add('active');
+                    document.getElementById(seccionId).classList.add('active');
+                });
+            });
+        }
+
+        // Inicializar pestañas en la sección de inventario
+        function inicializarTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Remover clase active de todas las pestañas y contenidos
+                    tabs.forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                    
+                    // Agregar clase active a la pestaña y contenido seleccionados
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+        }
+
+        // Inicializar modales
+        function inicializarModales() {
+            const modales = document.querySelectorAll('.modal');
+            const cerrarModales = document.querySelectorAll('.close-modal');
+            
+            cerrarModales.forEach(cerrar => {
+                cerrar.addEventListener('click', function() {
+                    modales.forEach(modal => modal.style.display = 'none');
+                });
+            });
+            
+            // Cerrar modal al hacer clic fuera del contenido
+            window.addEventListener('click', function(event) {
+                modales.forEach(modal => {
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Inicializar formularios
+        function inicializarFormularios() {
+            // Formulario de clientes
+            document.getElementById('cliente-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                registrarCliente();
+            });
+            
+            // Formulario de materiales
+            document.getElementById('material-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                registrarMaterial();
+            });
+            
+            // Formulario de precios
+            document.getElementById('form-precio').addEventListener('submit', function(e) {
+                e.preventDefault();
+                guardarPrecio();
+            });
+            
+            // Formulario de transacciones
+            document.getElementById('form-transaccion').addEventListener('submit', function(e) {
+                e.preventDefault();
+                registrarTransaccion();
+            });
+            
+            // Botón para nueva transacción
+            document.getElementById('btn-nueva-transaccion').addEventListener('click', function() {
+                abrirModalTransaccion();
+            });
+            
+            // Botón para generar reporte
+            document.getElementById('btn-generar-reporte').addEventListener('click', function() {
+                generarReporte();
+            });
+            
+            // Botón para descargar Excel
+            document.getElementById('btn-descargar-excel').addEventListener('click', function() {
+                descargarExcel();
+            });
+        }
+
+        // Actualizar la interfaz con los datos actuales
+        function actualizarInterfaz() {
+            actualizarListaClientes();
+            actualizarSelectClientes();
+            actualizarSelectMateriales();
+            actualizarTablaMateriales();
+            actualizarInventario();
+            actualizarListaPrecios();
+            actualizarFinanzas();
+        }
+
+        // Registrar un nuevo cliente
+        function registrarCliente() {
+            const nombre = document.getElementById('cliente-nombre').value;
+            const telefono = document.getElementById('cliente-telefono').value;
+            const email = document.getElementById('cliente-email').value;
+            const direccion = document.getElementById('cliente-direccion').value;
+            
+            const nuevoCliente = {
+                id: Date.now(),
+                nombre,
+                telefono,
+                email,
+                direccion,
+                fechaRegistro: new Date().toISOString().split('T')[0]
+            };
+            
+            datos.clientes.push(nuevoCliente);
+            guardarDatos();
+            actualizarInterfaz();
+            
+            // Limpiar formulario
+            document.getElementById('cliente-form').reset();
+            
+            // Mostrar mensaje de éxito
+            mostrarAlerta('Cliente registrado exitosamente', 'success');
+        }
+
+        // Actualizar la lista de clientes en la tabla
+        function actualizarListaClientes() {
+            const tbody = document.querySelector('#tabla-clientes tbody');
+            tbody.innerHTML = '';
+            
+            datos.clientes.forEach(cliente => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${cliente.id}</td>
+                    <td>${cliente.nombre}</td>
+                    <td>${cliente.telefono}</td>
+                    <td>${cliente.email}</td>
+                    <td>
+                        <button class="danger" onclick="eliminarCliente(${cliente.id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Actualizar el select de clientes en el formulario de materiales
+        function actualizarSelectClientes() {
+            const select = document.getElementById('material-cliente');
+            select.innerHTML = '<option value="">Seleccione un cliente</option>';
+            
+            datos.clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.id;
+                option.textContent = cliente.nombre;
+                select.appendChild(option);
+            });
+        }
+
+        // Actualizar el select de materiales
+        function actualizarSelectMateriales() {
+            const select = document.getElementById('material-tipo');
+            select.innerHTML = '<option value="">Seleccione un material</option>';
+            
+            tiposMaterial.forEach(material => {
+                const option = document.createElement('option');
+                option.value = material;
+                option.textContent = material.charAt(0).toUpperCase() + material.slice(1);
+                select.appendChild(option);
+            });
+            
+            // Actualizar precio cuando se selecciona un material
+            select.addEventListener('change', function() {
+                const material = this.value;
+                if (material && datos.precios[material]) {
+                    const unidad = document.getElementById('material-unidad').value;
+                    document.getElementById('material-precio').value = datos.precios[material][unidad];
+                }
+            });
+            
+            // Actualizar precio cuando cambia la unidad
+            document.getElementById('material-unidad').addEventListener('change', function() {
+                const material = document.getElementById('material-tipo').value;
+                if (material && datos.precios[material]) {
+                    document.getElementById('material-precio').value = datos.precios[material][this.value];
+                }
+            });
+        }
+
+        // Registrar un nuevo material
+        function registrarMaterial() {
+            const clienteId = parseInt(document.getElementById('material-cliente').value);
+            const tipo = document.getElementById('material-tipo').value;
+            const cantidad = parseFloat(document.getElementById('material-cantidad').value);
+            const unidad = document.getElementById('material-unidad').value;
+            const precio = parseFloat(document.getElementById('material-precio').value);
+            
+            const cliente = datos.clientes.find(c => c.id === clienteId);
+            if (!cliente) {
+                mostrarAlerta('Seleccione un cliente válido', 'error');
+                return;
+            }
+            
+            const nuevoMaterial = {
+                id: Date.now(),
+                clienteId,
+                clienteNombre: cliente.nombre,
+                tipo,
+                cantidad,
+                unidad,
+                precio,
+                total: cantidad * precio,
+                fecha: new Date().toISOString().split('T')[0]
+            };
+            
+            datos.materiales.push(nuevoMaterial);
+            
+            // Actualizar inventario
+            if (!datos.inventario[tipo]) {
+                datos.inventario[tipo] = { kilos: 0, piezas: 0 };
+            }
+            
+            if (unidad === 'kilo') {
+                datos.inventario[tipo].kilos += cantidad;
+            } else {
+                datos.inventario[tipo].piezas += cantidad;
+            }
+            
+            // Registrar transacción de gasto
+            const transaccion = {
+                id: Date.now(),
+                tipo: 'gasto',
+                descripcion: `Compra de ${cantidad} ${unidad}(s) de ${tipo} a ${cliente.nombre}`,
+                monto: nuevoMaterial.total,
+                fecha: nuevoMaterial.fecha
+            };
+            
+            datos.transacciones.push(transaccion);
+            
+            guardarDatos();
+            actualizarInterfaz();
+            
+            // Limpiar formulario
+            document.getElementById('material-form').reset();
+            
+            // Mostrar mensaje de éxito
+            mostrarAlerta('Material registrado exitosamente', 'success');
+        }
+
+        // Actualizar la tabla de materiales
+        function actualizarTablaMateriales() {
+            const tbody = document.querySelector('#tabla-materiales tbody');
+            tbody.innerHTML = '';
+            
+            const hoy = new Date().toISOString().split('T')[0];
+            const materialesHoy = datos.materiales.filter(m => m.fecha === hoy);
+            
+            materialesHoy.forEach(material => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${material.fecha}</td>
+                    <td>${material.clienteNombre}</td>
+                    <td>${material.tipo}</td>
+                    <td>${material.cantidad} ${material.unidad}</td>
+                    <td>$${material.precio.toFixed(2)}</td>
+                    <td>$${material.total.toFixed(2)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Actualizar el inventario
+        function actualizarInventario() {
+            const lista = document.getElementById('lista-inventario');
+            lista.innerHTML = '';
+            
+            tiposMaterial.forEach(material => {
+                const stock = datos.inventario[material] || { kilos: 0, piezas: 0 };
+                
+                const item = document.createElement('div');
+                item.className = 'material-item';
+                item.innerHTML = `
+                    <div class="material-info">
+                        <strong>${material.charAt(0).toUpperCase() + material.slice(1)}</strong>
+                        <div>Kilos: ${stock.kilos.toFixed(2)}</div>
+                        <div>Piezas: ${stock.piezas}</div>
+                    </div>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        // Actualizar la lista de precios
+        function actualizarListaPrecios() {
+            const lista = document.getElementById('lista-precios');
+            lista.innerHTML = '';
+            
+            tiposMaterial.forEach(material => {
+                const precio = datos.precios[material] || { kilo: 0, pieza: 0 };
+                
+                const item = document.createElement('div');
+                item.className = 'material-item';
+                item.innerHTML = `
+                    <div class="material-info">
+                        <strong>${material.charAt(0).toUpperCase() + material.slice(1)}</strong>
+                        <div>Precio por kilo: $${precio.kilo.toFixed(2)}</div>
+                        <div>Precio por pieza: $${precio.pieza.toFixed(2)}</div>
+                    </div>
+                    <div class="material-actions">
+                        <button class="success" onclick="editarPrecio('${material}')">Editar</button>
+                    </div>
+                `;
+                lista.appendChild(item);
+            });
+        }
+
+        // Abrir modal para editar precio
+        function editarPrecio(material) {
+            const precio = datos.precios[material] || { kilo: 0, pieza: 0 };
+            
+            document.getElementById('precio-id').value = material;
+            document.getElementById('precio-material').value = material.charAt(0).toUpperCase() + material.slice(1);
+            document.getElementById('precio-kilo').value = precio.kilo;
+            document.getElementById('precio-pieza').value = precio.pieza;
+            
+            document.getElementById('modal-precio').style.display = 'flex';
+        }
+
+        // Guardar cambios en el precio
+        function guardarPrecio() {
+            const material = document.getElementById('precio-id').value;
+            const precioKilo = parseFloat(document.getElementById('precio-kilo').value);
+            const precioPieza = parseFloat(document.getElementById('precio-pieza').value);
+            
+            datos.precios[material] = {
+                kilo: precioKilo,
+                pieza: precioPieza
+            };
+            
+            guardarDatos();
+            actualizarInterfaz();
+            
+            document.getElementById('modal-precio').style.display = 'none';
+            mostrarAlerta('Precio actualizado exitosamente', 'success');
+        }
+
+        // Actualizar la sección de finanzas
+        function actualizarFinanzas() {
+            // Calcular totales
+            let ingresos = 0;
+            let gastos = 0;
+            
+            datos.transacciones.forEach(transaccion => {
+                if (transaccion.tipo === 'ingreso') {
+                    ingresos += transaccion.monto;
+                } else {
+                    gastos += transaccion.monto;
+                }
+            });
+            
+            const balance = ingresos - gastos;
+            
+            // Actualizar estadísticas
+            document.getElementById('inversion-inicial').textContent = `$${datos.inversionInicial.toFixed(2)}`;
+            document.getElementById('ingresos-totales').textContent = `$${ingresos.toFixed(2)}`;
+            document.getElementById('gastos-totales').textContent = `$${gastos.toFixed(2)}`;
+            document.getElementById('balance-actual').textContent = `$${balance.toFixed(2)}`;
+            
+            // Actualizar tabla de transacciones
+            const tbody = document.querySelector('#tabla-transacciones tbody');
+            tbody.innerHTML = '';
+            
+            datos.transacciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha)).forEach(transaccion => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${transaccion.fecha}</td>
+                    <td>${transaccion.tipo === 'ingreso' ? 'Ingreso' : 'Gasto'}</td>
+                    <td>${transaccion.descripcion}</td>
+                    <td>$${transaccion.monto.toFixed(2)}</td>
+                    <td>
+                        <button class="danger" onclick="eliminarTransaccion(${transaccion.id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Abrir modal para nueva transacción
+        function abrirModalTransaccion() {
+            document.getElementById('transaccion-fecha').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modal-transaccion').style.display = 'flex';
+        }
+
+        // Registrar una nueva transacción
+        function registrarTransaccion() {
+            const tipo = document.getElementById('transaccion-tipo').value;
+            const descripcion = document.getElementById('transaccion-descripcion').value;
+            const monto = parseFloat(document.getElementById('transaccion-monto').value);
+            const fecha = document.getElementById('transaccion-fecha').value;
+            
+            const nuevaTransaccion = {
+                id: Date.now(),
+                tipo,
+                descripcion,
+                monto,
+                fecha
+            };
+            
+            datos.transacciones.push(nuevaTransaccion);
+            guardarDatos();
+            actualizarInterfaz();
+            
+            document.getElementById('modal-transaccion').style.display = 'none';
+            document.getElementById('form-transaccion').reset();
+            
+            mostrarAlerta('Transacción registrada exitosamente', 'success');
+        }
+
+        // Generar reporte de corte de caja
+        function generarReporte() {
+            const fechaInicio = document.getElementById('fecha-inicio').value;
+            const fechaFin = document.getElementById('fecha-fin').value;
+            
+            if (!fechaInicio || !fechaFin) {
+                mostrarAlerta('Seleccione ambas fechas', 'error');
+                return;
+            }
+            
+            const transaccionesFiltradas = datos.transacciones.filter(t => {
+                return t.fecha >= fechaInicio && t.fecha <= fechaFin;
+            });
+            
+            const materialesFiltrados = datos.materiales.filter(m => {
+                return m.fecha >= fechaInicio && m.fecha <= fechaFin;
+            });
+            
+            let ingresos = 0;
+            let gastos = 0;
+            
+            transaccionesFiltradas.forEach(t => {
+                if (t.tipo === 'ingreso') {
+                    ingresos += t.monto;
+                } else {
+                    gastos += t.monto;
+                }
+            });
+            
+            const resumen = document.getElementById('resumen-corte');
+            resumen.innerHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <h4>Ingresos</h4>
+                        <p>$${ingresos.toFixed(2)}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Gastos</h4>
+                        <p>$${gastos.toFixed(2)}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Balance</h4>
+                        <p>$${(ingresos - gastos).toFixed(2)}</p>
+                    </div>
+                    <div class="stat-card">
+                        <h4>Transacciones</h4>
+                        <p>${transaccionesFiltradas.length}</p>
+                    </div>
+                </div>
+                <h4>Materiales adquiridos en el período:</h4>
+                <ul>
+                    ${materialesFiltrados.map(m => `<li>${m.cantidad} ${m.unidad}(s) de ${m.tipo} - $${m.total.toFixed(2)}</li>`).join('')}
+                </ul>
+            `;
+        }
+
+        // Descargar datos a Excel (simulado)
+        function descargarExcel() {
+            // En una implementación real, aquí se conectaría con Google Drive API
+            // Por ahora, simulamos la descarga creando un archivo de texto con los datos
+            
+            const fechaInicio = document.getElementById('fecha-inicio').value;
+            const fechaFin = document.getElementById('fecha-fin').value;
+            
+            if (!fechaInicio || !fechaFin) {
+                mostrarAlerta('Seleccione ambas fechas', 'error');
+                return;
+            }
+            
+            const contenido = `
+                REPORTE DE RECICLAJE - ${fechaInicio} a ${fechaFin}
+                
+                CLIENTES:
+                ${datos.clientes.map(c => `${c.id},${c.nombre},${c.telefono},${c.email},${c.direccion}`).join('\n')}
+                
+                MATERIALES:
+                ${datos.materiales.filter(m => m.fecha >= fechaInicio && m.fecha <= fechaFin)
+                    .map(m => `${m.fecha},${m.clienteNombre},${m.tipo},${m.cantidad},${m.unidad},${m.precio},${m.total}`).join('\n')}
+                
+                INVENTARIO:
+                ${Object.entries(datos.inventario).map(([material, stock]) => 
+                    `${material},${stock.kilos},${stock.piezas}`).join('\n')}
+                
+                FINANZAS:
+                ${datos.transacciones.filter(t => t.fecha >= fechaInicio && t.fecha <= fechaFin)
+                    .map(t => `${t.fecha},${t.tipo},${t.descripcion},${t.monto}`).join('\n')}
+            `;
+            
+            const blob = new Blob([contenido], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `reporte_reciclaje_${fechaInicio}_a_${fechaFin}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            mostrarAlerta('Archivo descargado (simulación). En una implementación real se guardaría en Google Drive.', 'success');
+        }
+
+        // Eliminar un cliente
+        function eliminarCliente(id) {
+            if (confirm('¿Está seguro de que desea eliminar este cliente?')) {
+                datos.clientes = datos.clientes.filter(c => c.id !== id);
+                guardarDatos();
+                actualizarInterfaz();
+                mostrarAlerta('Cliente eliminado exitosamente', 'success');
+            }
+        }
+
+        // Eliminar una transacción
+        function eliminarTransaccion(id) {
+            if (confirm('¿Está seguro de que desea eliminar esta transacción?')) {
+                datos.transacciones = datos.transacciones.filter(t => t.id !== id);
+                guardarDatos();
+                actualizarInterfaz();
+                mostrarAlerta('Transacción eliminada exitosamente', 'success');
+            }
+        }
+
+        // Mostrar alerta
+        function mostrarAlerta(mensaje, tipo) {
+            // Crear elemento de alerta
+            const alerta = document.createElement('div');
+            alerta.className = `alert alert-${tipo === 'success' ? 'success' : 'error'}`;
+            alerta.textContent = mensaje;
+            
+            // Insertar al principio del contenedor
+            const container = document.querySelector('.container');
+            container.insertBefore(alerta, container.firstChild);
+            
+            // Eliminar después de 3 segundos
+            setTimeout(() => {
+                alerta.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
