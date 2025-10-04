@@ -933,6 +933,9 @@
                     <td>${material.cantidad} ${material.unidad}</td>
                     <td>$${material.precio.toFixed(2)}</td>
                     <td>$${material.total.toFixed(2)}</td>
+                    <td>
+                        <button class="danger" onclick="eliminarMateriales(${material.id})">Eliminar</button>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -1206,6 +1209,16 @@
             }
         }
 
+        // Eliminar materiales
+        function eliminarMateriales(id) {
+            if (confirm('¿Está seguro de que desea eliminar esta transacción?')) {
+                datos.materiales = datos.materiales.filter(t => t.id !== id);
+                guardarDatos();
+                actualizarInterfaz();
+                mostrarAlerta('Transacción eliminada exitosamente', 'success');
+            }
+        }
+
         // Mostrar alerta
         function mostrarAlerta(mensaje, tipo) {
             // Crear elemento de alerta
@@ -1226,4 +1239,5 @@
 </body>
 
 </html>
+
 
