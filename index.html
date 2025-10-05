@@ -10,6 +10,7 @@
             --secondary: #3498db;
             --success: #27ae60;
             --danger: #e74c3c;
+            --warning: #f39c12;
             --light: #ecf0f1;
             --dark: #34495e;
         }
@@ -136,6 +137,14 @@
         
         button.success:hover {
             background-color: #219653;
+        }
+        
+        button.warning {
+            background-color: var(--warning);
+        }
+        
+        button.warning:hover {
+            background-color: #e67e22;
         }
         
         table {
@@ -300,6 +309,51 @@
             display: block;
         }
         
+        .inventario-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .search-box {
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .inventario-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .inventario-table th, 
+        .inventario-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .inventario-table th {
+            background-color: var(--light);
+        }
+        
+        .cantidad-input {
+            width: 80px;
+            padding: 5px;
+            text-align: center;
+        }
+        
+        .materiales-controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .filtros-materiales {
+            display: flex;
+            gap: 10px;
+        }
+        
         @media (max-width: 768px) {
             nav {
                 flex-wrap: wrap;
@@ -311,6 +365,26 @@
             
             .stats {
                 grid-template-columns: 1fr;
+            }
+            
+            .inventario-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .search-box {
+                max-width: 100%;
+            }
+            
+            .materiales-controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            
+            .filtros-materiales {
+                width: 100%;
+                flex-direction: column;
             }
         }
     </style>
@@ -412,7 +486,22 @@
             </div>
             
             <div class="card">
-                <h3>Materiales Ingresados Hoy</h3>
+                <div class="materiales-controls">
+                    <h3>Materiales Registrados</h3>
+                    <div class="filtros-materiales">
+                        <div class="form-group">
+                            <label for="filtro-fecha">Filtrar por fecha:</label>
+                            <input type="date" id="filtro-fecha">
+                        </div>
+                        <div class="form-group">
+                            <label for="filtro-cliente">Filtrar por cliente:</label>
+                            <select id="filtro-cliente">
+                                <option value="">Todos los clientes</option>
+                            </select>
+                        </div>
+                        <button id="btn-limpiar-filtros" class="warning">Limpiar Filtros</button>
+                    </div>
+                </div>
                 <table id="tabla-materiales">
                     <thead>
                         <tr>
@@ -420,8 +509,9 @@
                             <th>Cliente</th>
                             <th>Material</th>
                             <th>Cantidad</th>
-                            <th>Precio</th>
+                            <th>Precio Unit.</th>
                             <th>Total</th>
+                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -441,10 +531,27 @@
             
             <div class="tab-content active" id="materiales-tab">
                 <div class="card">
-                    <h3>Stock Actual</h3>
-                    <div id="lista-inventario">
-                        <!-- Los materiales del inventario se cargarán aquí dinámicamente -->
+                    <div class="inventario-controls">
+                        <h3>Stock Actual</h3>
+                        <div class="search-box">
+                            <input type="text" id="buscar-material" placeholder="Buscar material...">
+                        </div>
                     </div>
+                    <table class="inventario-table">
+                        <thead>
+                            <tr>
+                                <th>Material</th>
+                                <th>Kilos</th>
+                                <th>Piezas</th>
+                                <th>Valor Total (Kilos)</th>
+                                <th>Valor Total (Piezas)</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-inventario">
+                            <!-- Los materiales del inventario se cargarán aquí dinámicamente -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
             
@@ -464,7 +571,7 @@
             <div class="stats">
                 <div class="stat-card">
                     <h4>Inversión Inicial</h4>
-                    <p id="inversion-inicial">$1500.00</p>
+                    <p id="inversion-inicial">$0.00</p>
                 </div>
                 <div class="stat-card">
                     <h4>Ingresos Totales</h4>
@@ -586,6 +693,49 @@
         </div>
     </div>
 
+    <!-- Modal para editar inventario -->
+    <div id="modal-inventario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Editar Inventario</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <form id="form-inventario">
+                <input type="hidden" id="inventario-material">
+                <div class="form-group">
+                    <label for="inventario-material-nombre">Material:</label>
+                    <input type="text" id="inventario-material-nombre" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="inventario-kilos">Kilos:</label>
+                    <input type="number" id="inventario-kilos" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="inventario-piezas">Piezas:</label>
+                    <input type="number" id="inventario-piezas" min="0" step="1" required>
+                </div>
+                <button type="submit" class="success">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar material -->
+    <div id="modal-confirmar-eliminar" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmar Eliminación</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="form-group">
+                <p id="mensaje-confirmacion">¿Está seguro de que desea eliminar este material?</p>
+            </div>
+            <div class="form-group" style="display: flex; justify-content: space-between;">
+                <button id="btn-confirmar-eliminar" class="danger">Sí, Eliminar</button>
+                <button id="btn-cancelar-eliminar" class="success">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Datos iniciales
         let datos = {
@@ -596,6 +746,9 @@
             transacciones: [],
             inversionInicial: 0
         };
+
+        // Variables para controlar la eliminación
+        let materialAEliminar = null;
 
         // Lista de materiales
         const tiposMaterial = [
@@ -612,7 +765,7 @@
             "procesador plastico pines sucio", "procesador liso", 
             "procesador liso sucio", "pila de celular", "pila de laptop", 
             "pila de li-hion", "membrana", "radiografia", "cable", 
-            "cale utp", "fuente de pc" , "electronico", "cd", "televisiones"
+            "cale utp", "fuente de pc"
         ];
 
         // Inicializar la aplicación
@@ -622,6 +775,8 @@
             inicializarFormularios();
             inicializarTabs();
             inicializarModales();
+            inicializarBusqueda();
+            inicializarFiltros();
             actualizarInterfaz();
         });
 
@@ -634,8 +789,8 @@
                 // Inicializar precios por defecto
                 tiposMaterial.forEach(material => {
                     datos.precios[material] = {
-                        kilo: 0,
-                        pieza: 0
+                        kilo: 10.0,
+                        pieza: 5.0
                     };
                 });
                 
@@ -711,6 +866,87 @@
                     }
                 });
             });
+            
+            // Configurar botones de confirmación de eliminación
+            document.getElementById('btn-confirmar-eliminar').addEventListener('click', function() {
+                if (materialAEliminar) {
+                    eliminarMaterial(materialAEliminar);
+                    materialAEliminar = null;
+                }
+                document.getElementById('modal-confirmar-eliminar').style.display = 'none';
+            });
+            
+            document.getElementById('btn-cancelar-eliminar').addEventListener('click', function() {
+                materialAEliminar = null;
+                document.getElementById('modal-confirmar-eliminar').style.display = 'none';
+            });
+        }
+
+        // Inicializar búsqueda en inventario
+        function inicializarBusqueda() {
+            const buscarInput = document.getElementById('buscar-material');
+            buscarInput.addEventListener('input', function() {
+                filtrarInventario(this.value);
+            });
+        }
+
+        // Inicializar filtros en materiales
+        function inicializarFiltros() {
+            // Filtro por fecha
+            document.getElementById('filtro-fecha').addEventListener('change', function() {
+                aplicarFiltrosMateriales();
+            });
+            
+            // Filtro por cliente
+            document.getElementById('filtro-cliente').addEventListener('change', function() {
+                aplicarFiltrosMateriales();
+            });
+            
+            // Botón limpiar filtros
+            document.getElementById('btn-limpiar-filtros').addEventListener('click', function() {
+                document.getElementById('filtro-fecha').value = '';
+                document.getElementById('filtro-cliente').value = '';
+                aplicarFiltrosMateriales();
+            });
+        }
+
+        // Filtrar inventario por término de búsqueda
+        function filtrarInventario(termino) {
+            const filas = document.querySelectorAll('#tabla-inventario tr');
+            filas.forEach(fila => {
+                const textoFila = fila.textContent.toLowerCase();
+                if (textoFila.includes(termino.toLowerCase())) {
+                    fila.style.display = '';
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+        }
+
+        // Aplicar filtros a la tabla de materiales
+        function aplicarFiltrosMateriales() {
+            const fechaFiltro = document.getElementById('filtro-fecha').value;
+            const clienteFiltro = document.getElementById('filtro-cliente').value;
+            
+            const tbody = document.querySelector('#tabla-materiales tbody');
+            const filas = tbody.querySelectorAll('tr');
+            
+            filas.forEach(fila => {
+                const fecha = fila.cells[0].textContent;
+                const cliente = fila.cells[1].textContent;
+                
+                let mostrar = true;
+                
+                if (fechaFiltro && fecha !== fechaFiltro) {
+                    mostrar = false;
+                }
+                
+                if (clienteFiltro && cliente !== clienteFiltro) {
+                    mostrar = false;
+                }
+                
+                fila.style.display = mostrar ? '' : 'none';
+            });
         }
 
         // Inicializar formularios
@@ -739,6 +975,12 @@
                 registrarTransaccion();
             });
             
+            // Formulario de inventario
+            document.getElementById('form-inventario').addEventListener('submit', function(e) {
+                e.preventDefault();
+                guardarInventario();
+            });
+            
             // Botón para nueva transacción
             document.getElementById('btn-nueva-transaccion').addEventListener('click', function() {
                 abrirModalTransaccion();
@@ -764,6 +1006,7 @@
             actualizarInventario();
             actualizarListaPrecios();
             actualizarFinanzas();
+            actualizarFiltroClientes();
         }
 
         // Registrar un nuevo cliente
@@ -821,6 +1064,19 @@
             datos.clientes.forEach(cliente => {
                 const option = document.createElement('option');
                 option.value = cliente.id;
+                option.textContent = cliente.nombre;
+                select.appendChild(option);
+            });
+        }
+
+        // Actualizar el filtro de clientes en materiales
+        function actualizarFiltroClientes() {
+            const select = document.getElementById('filtro-cliente');
+            select.innerHTML = '<option value="">Todos los clientes</option>';
+            
+            datos.clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.nombre;
                 option.textContent = cliente.nombre;
                 select.appendChild(option);
             });
@@ -921,10 +1177,12 @@
             const tbody = document.querySelector('#tabla-materiales tbody');
             tbody.innerHTML = '';
             
-            const hoy = new Date().toISOString().split('T')[0];
-            const materialesHoy = datos.materiales.filter(m => m.fecha === hoy);
+            // Ordenar materiales por fecha (más recientes primero)
+            const materialesOrdenados = [...datos.materiales].sort((a, b) => 
+                new Date(b.fecha) - new Date(a.fecha)
+            );
             
-            materialesHoy.forEach(material => {
+            materialesOrdenados.forEach(material => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${material.fecha}</td>
@@ -934,93 +1192,116 @@
                     <td>$${material.precio.toFixed(2)}</td>
                     <td>$${material.total.toFixed(2)}</td>
                     <td>
-                        <button class="danger" onclick="eliminarMateriales(${material.id})">Eliminar</button>
+                        <button class="danger" onclick="confirmarEliminarMaterial(${material.id})">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // Actualizar el inventario
-function actualizarInventario() {
-    const lista = document.getElementById('lista-inventario');
-    lista.innerHTML = '';
-    
-    tiposMaterial.forEach(material => {
-        const stock = datos.materiales[material] || { kilos: 0, piezas: 0 };
-        
-        const item = document.createElement('div');
-        item.className = 'material-item';
-        item.innerHTML = `
-            <div class="material-info">
-                <strong>${material.charAt(0).toUpperCase() + material.slice(1)}</strong>
-                <div>
-                    <label>Stock por kilos:</label>
-                    <input type="number" step="0.01" value="${stock.kilos.toFixed(2)}" 
-                           data-material="${material}" data-tipo="kilos" 
-                           class="editable-input">
-                </div>
-                <div>
-                    <label>Stock por piezas:</label>
-                    <input type="number" value="${stock.piezas}" 
-                           data-material="${material}" data-tipo="piezas" 
-                           class="editable-input">
-                </div>
-                <button onclick="guardarCambios('${material}')" class="btn-guardar">
-                    Guardar Cambios
-                </button>
-            </div>
-        `;
-        lista.appendChild(item);
-    });
-    
-    // Agregar evento para guardar con Enter
-    agregarEventosEnter();
-}
+        // Confirmar eliminación de material
+        function confirmarEliminarMaterial(materialId) {
+            const material = datos.materiales.find(m => m.id === materialId);
+            if (!material) return;
+            
+            materialAEliminar = materialId;
+            
+            document.getElementById('mensaje-confirmacion').textContent = 
+                `¿Está seguro de que desea eliminar el material "${material.tipo}" del cliente "${material.clienteNombre}"?`;
+            
+            document.getElementById('modal-confirmar-eliminar').style.display = 'flex';
+        }
 
-// Función para guardar cambios de un material específico
-function guardarCambios(material) {
-    const inputKilos = document.querySelector(`input[data-material="${material}"][data-tipo="kilos"]`);
-    const inputPiezas = document.querySelector(`input[data-material="${material}"][data-tipo="piezas"]`);
-    
-    const nuevosKilos = parseFloat(inputKilos.value) || 0;
-    const nuevasPiezas = parseInt(inputPiezas.value) || 0;
-    
-    // Actualizar los datos
-    if (!datos.materiales[material]) {
-        datos.materiales[material] = {};
-    }
-    datos.materiales[material].kilos = nuevosKilos;
-    datos.materiales[material].piezas = nuevasPiezas;
-    
-    // Guardar en localStorage (si estás usando)
-    guardarDatos();
-    
-    // Mostrar mensaje de confirmación
-    alert(`¡${material} actualizado!\nKilos: ${nuevosKilos}\nPiezas: ${nuevasPiezas}`);
-}
-
-// Función para agregar eventos de teclado (Enter)
-function agregarEventosEnter() {
-    const inputs = document.querySelectorAll('.editable-input');
-    inputs.forEach(input => {
-        input.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                const material = this.getAttribute('data-material');
-                guardarCambios(material);
+        // Eliminar material
+        function eliminarMaterial(materialId) {
+            const materialIndex = datos.materiales.findIndex(m => m.id === materialId);
+            if (materialIndex === -1) return;
+            
+            const material = datos.materiales[materialIndex];
+            
+            // Revertir el inventario
+            if (datos.inventario[material.tipo]) {
+                if (material.unidad === 'kilo') {
+                    datos.inventario[material.tipo].kilos -= material.cantidad;
+                } else {
+                    datos.inventario[material.tipo].piezas -= material.cantidad;
+                }
             }
-        });
-    });
-}
+            
+            // Eliminar la transacción asociada
+            const transaccionIndex = datos.transacciones.findIndex(t => 
+                t.descripcion.includes(`Compra de ${material.cantidad} ${material.unidad}(s) de ${material.tipo} a ${material.clienteNombre}`)
+            );
+            
+            if (transaccionIndex !== -1) {
+                datos.transacciones.splice(transaccionIndex, 1);
+            }
+            
+            // Eliminar el material
+            datos.materiales.splice(materialIndex, 1);
+            
+            guardarDatos();
+            actualizarInterfaz();
+            
+            mostrarAlerta('Material eliminado exitosamente', 'success');
+        }
 
-// Función para guardar datos (ajusta según tu implementación)
-function guardarDatos() {
-    // Si usas localStorage:
-    // localStorage.setItem('inventarioData', JSON.stringify(datos));
-    
-    // O tu método específico para guardar
-    console.log('Datos guardados:', datos);
-}
+        // Actualizar el inventario en la tabla
+        function actualizarInventario() {
+            const tbody = document.getElementById('tabla-inventario');
+            tbody.innerHTML = '';
+            
+            tiposMaterial.forEach(material => {
+                const stock = datos.inventario[material] || { kilos: 0, piezas: 0 };
+                const precio = datos.precios[material] || { kilo: 0, pieza: 0 };
+                
+                const valorKilos = stock.kilos * precio.kilo;
+                const valorPiezas = stock.piezas * precio.pieza;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${material.charAt(0).toUpperCase() + material.slice(1)}</td>
+                    <td>${stock.kilos.toFixed(2)}</td>
+                    <td>${stock.piezas}</td>
+                    <td>$${valorKilos.toFixed(2)}</td>
+                    <td>$${valorPiezas.toFixed(2)}</td>
+                    <td>
+                        <button class="warning" onclick="editarInventario('${material}')">Editar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Abrir modal para editar inventario
+        function editarInventario(material) {
+            const stock = datos.inventario[material] || { kilos: 0, piezas: 0 };
+            
+            document.getElementById('inventario-material').value = material;
+            document.getElementById('inventario-material-nombre').value = material.charAt(0).toUpperCase() + material.slice(1);
+            document.getElementById('inventario-kilos').value = stock.kilos;
+            document.getElementById('inventario-piezas').value = stock.piezas;
+            
+            document.getElementById('modal-inventario').style.display = 'flex';
+        }
+
+        // Guardar cambios en el inventario
+        function guardarInventario() {
+            const material = document.getElementById('inventario-material').value;
+            const kilos = parseFloat(document.getElementById('inventario-kilos').value);
+            const piezas = parseInt(document.getElementById('inventario-piezas').value);
+            
+            datos.inventario[material] = {
+                kilos: kilos,
+                piezas: piezas
+            };
+            
+            guardarDatos();
+            actualizarInterfaz();
+            
+            document.getElementById('modal-inventario').style.display = 'none';
+            mostrarAlerta('Inventario actualizado exitosamente', 'success');
+        }
 
         // Actualizar la lista de precios
         function actualizarListaPrecios() {
@@ -1252,6 +1533,13 @@ function guardarDatos() {
         // Eliminar un cliente
         function eliminarCliente(id) {
             if (confirm('¿Está seguro de que desea eliminar este cliente?')) {
+                // Verificar si el cliente tiene materiales registrados
+                const materialesCliente = datos.materiales.filter(m => m.clienteId === id);
+                if (materialesCliente.length > 0) {
+                    mostrarAlerta('No se puede eliminar el cliente porque tiene materiales registrados', 'error');
+                    return;
+                }
+                
                 datos.clientes = datos.clientes.filter(c => c.id !== id);
                 guardarDatos();
                 actualizarInterfaz();
@@ -1263,16 +1551,6 @@ function guardarDatos() {
         function eliminarTransaccion(id) {
             if (confirm('¿Está seguro de que desea eliminar esta transacción?')) {
                 datos.transacciones = datos.transacciones.filter(t => t.id !== id);
-                guardarDatos();
-                actualizarInterfaz();
-                mostrarAlerta('Transacción eliminada exitosamente', 'success');
-            }
-        }
-
-        // Eliminar materiales
-        function eliminarMateriales(id) {
-            if (confirm('¿Está seguro de que desea eliminar esta transacción?')) {
-                datos.materiales = datos.materiales.filter(t => t.id !== id);
                 guardarDatos();
                 actualizarInterfaz();
                 mostrarAlerta('Transacción eliminada exitosamente', 'success');
@@ -1297,8 +1575,4 @@ function guardarDatos() {
         }
     </script>
 </body>
-
 </html>
-
-
-
