@@ -942,25 +942,85 @@
         }
 
         // Actualizar el inventario
-        function actualizarInventario() {
-            const lista = document.getElementById('lista-inventario');
-            lista.innerHTML = '';
-            
-            tiposMaterial.forEach(material => {
-                const stock = datos.inventario[material] || { kilos: 0, piezas: 0 };
-                
-                const item = document.createElement('div');
-                item.className = 'material-item';
-                item.innerHTML = `
-                    <div class="material-info">
-                        <strong>${material.charAt(0).toUpperCase() + material.slice(1)}</strong>
-                        <div>Kilos: ${stock.kilos.toFixed(2)}</div>
-                        <div>Piezas: ${stock.piezas}</div>
-                    </div>
-                `;
-                lista.appendChild(item);
-            });
-        }
+function actualizarInventario() {
+    const lista = document.getElementById('lista-inventario');
+    lista.innerHTML = '';
+    
+    tiposMaterial.forEach(material => {
+        const stock = datos.materiales[material] || { kilos: 0, piezas: 0 };
+        
+        const item = document.createElement('div');
+        item.className = 'material-item';
+        item.innerHTML = `
+            <div class="material-info">
+                <strong>${material.charAt(0).toUpperCase() + material.slice(1)}</strong>
+                <div>
+                    <label>Stock por kilos:</label>
+                    <input type="number" step="0.01" value="${stock.kilos.toFixed(2)}" 
+                           data-material="${material}" data-tipo="kilos" 
+                           class="editable-input">
+                </div>
+                <div>
+                    <label>Stock por piezas:</label>
+                    <input type="number" value="${stock.piezas}" 
+                           data-material="${material}" data-tipo="piezas" 
+                           class="editable-input">
+                </div>
+                <button onclick="guardarCambios('${material}')" class="btn-guardar">
+                    Guardar Cambios
+                </button>
+            </div>
+        `;
+        lista.appendChild(item);
+    });
+    
+    // Agregar evento para guardar con Enter
+    agregarEventosEnter();
+}
+
+// Función para guardar cambios de un material específico
+function guardarCambios(material) {
+    const inputKilos = document.querySelector(`input[data-material="${material}"][data-tipo="kilos"]`);
+    const inputPiezas = document.querySelector(`input[data-material="${material}"][data-tipo="piezas"]`);
+    
+    const nuevosKilos = parseFloat(inputKilos.value) || 0;
+    const nuevasPiezas = parseInt(inputPiezas.value) || 0;
+    
+    // Actualizar los datos
+    if (!datos.materiales[material]) {
+        datos.materiales[material] = {};
+    }
+    datos.materiales[material].kilos = nuevosKilos;
+    datos.materiales[material].piezas = nuevasPiezas;
+    
+    // Guardar en localStorage (si estás usando)
+    guardarDatos();
+    
+    // Mostrar mensaje de confirmación
+    alert(`¡${material} actualizado!\nKilos: ${nuevosKilos}\nPiezas: ${nuevasPiezas}`);
+}
+
+// Función para agregar eventos de teclado (Enter)
+function agregarEventosEnter() {
+    const inputs = document.querySelectorAll('.editable-input');
+    inputs.forEach(input => {
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const material = this.getAttribute('data-material');
+                guardarCambios(material);
+            }
+        });
+    });
+}
+
+// Función para guardar datos (ajusta según tu implementación)
+function guardarDatos() {
+    // Si usas localStorage:
+    // localStorage.setItem('inventarioData', JSON.stringify(datos));
+    
+    // O tu método específico para guardar
+    console.log('Datos guardados:', datos);
+}
 
         // Actualizar la lista de precios
         function actualizarListaPrecios() {
@@ -1239,5 +1299,6 @@
 </body>
 
 </html>
+
 
 
